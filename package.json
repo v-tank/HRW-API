@@ -1,0 +1,24 @@
+{
+  "name": "hrw-api",
+  "version": "1.0.0",
+  "description": "A node app to communicate with the HRW API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/v-tank/HRW-API.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/v-tank/HRW-API/issues"
+  },
+  "homepage": "https://github.com/v-tank/HRW-API#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "dotenv": "^6.1.0",
+    "inquirer": "^6.2.0"
+  }
+}
