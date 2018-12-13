@@ -529,7 +529,7 @@ function manageTestCandidates() {
       name: "testCandidateTask",
       type: "list",
       message: "What would you like to do with the test candidates?",
-      choices: ["List all candidates", "Invite a candidate", "Show a candidate", "Update a Candidate", "Get a PDF report", "Delete a report", "Cancel an invite", "Search for candidates"]
+      choices: ["List all candidates", "Invite a candidate", "Show a candidate", "Delete a report", "Cancel an invite", "Search for candidates"]
     })
     .then( res => {
       switch (res.testCandidateTask) {
@@ -651,38 +651,59 @@ function manageTestCandidates() {
               });
             })
           break;
-        case "Update a Candidate":
-          console.log("Updating a test candidate might be easier through the UI, so I'd suggest logging in through the website.")
-          break;
-        case "Get a PDF report":
+        case "Delete a report":
           inquirer
             .prompt([
               {
                 name: "testID",
                 type: "input",
-                message: "What is the test ID for which you want the PDF report?"
+                message: "What is the test ID for which you want to delete the candidate report?"
               },
               {
-                name: "candidateID",
+                name: "candidateEmail",
                 type: "input",
-                message: "What is the candidate's ID? "
+                message: "What is the candidate's email address? "
               }
             ])
             .then( res => {
               let type = "tests";
               let subtype = "candidates";
-              let item = "pdf";
-
-              axios.get(`${baseURL}${type}/${res.testID}/${subtype}/${res.candidateID}/${item}`, 
-                {
-                  auth: {
-                    username: keys.auth.ACCESS_TOKEN,
-                    password: keys.auth.PASSWORD
-                  }
+              // Make a GET request to find the candidate's ID
+              axios.get(`${baseURL}/${type}/${res.testID}/${subtype}/search`, {
+                params: {
+                  search: res.candidateEmail,
+                  limit: 10,
+                  offset: 0,
+                },
+                auth: {
+                  username: keys.auth.ACCESS_TOKEN,
+                  password: keys.auth.PASSWORD
                 }
-              )
+              })
               .then( res => {
-                console.log(res.data);
+                // console.log(res.data.data);
+                let entry = res.data.data.filter(el => el.email === res.config.params.search);
+                if (entry.length > 0) {
+                  let candidateID = entry[0].id;
+                  let testID = entry[0].test;
+                  let type = 'tests';
+                  let subtype = 'candidates';
+                  axios.delete(`${baseURL}/${type}/${testID}/${subtype}/${candidateID}/report`, {
+                    auth: {
+                      username: keys.auth.ACCESS_TOKEN,
+                      password: keys.auth.PASSWORD
+                    }
+                  })
+                  .then( res => {
+                    console.log(res.data[0]);
+                  })
+                  .catch( err => {
+                    console.log(err);
+                  });
+                  //
+                } else {
+                  console.log('Email not found. Please try again.');
+                }
               })
               .catch( err => {
                 console.log(err);
