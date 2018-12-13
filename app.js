@@ -710,6 +710,64 @@ function manageTestCandidates() {
               });
             })
           break;
+        case "Cancel an invite":
+          inquirer
+            .prompt([
+              {
+                name: "testID",
+                type: "input",
+                message: "What is the test ID for which you want to cancel the invite?"
+              },
+              {
+                name: "candidateEmail",
+                type: "input",
+                message: "What is the candidate's email address? "
+              }
+            ])
+            .then( res => {
+              let type = "tests";
+              let subtype = "candidates";
+              // Make a GET request to find the candidate's ID
+              axios.get(`${baseURL}/${type}/${res.testID}/${subtype}/search`, {
+                params: {
+                  search: res.candidateEmail,
+                  limit: 10,
+                  offset: 0,
+                },
+                auth: {
+                  username: keys.auth.ACCESS_TOKEN,
+                  password: keys.auth.PASSWORD
+                }
+              })
+              .then( res => {
+                // console.log(res.data.data);
+                let entry = res.data.data.filter(el => el.email === res.config.params.search);
+                if (entry.length > 0) {
+                  let candidateID = entry[0].id;
+                  let testID = entry[0].test;
+                  let type = 'tests';
+                  let subtype = 'candidates';
+                  axios.delete(`${baseURL}/${type}/${testID}/${subtype}/${candidateID}/invite`, {
+                    auth: {
+                      username: keys.auth.ACCESS_TOKEN,
+                      password: keys.auth.PASSWORD
+                    }
+                  })
+                  .then( res => {
+                    console.log(res.data[0]);
+                  })
+                  .catch( err => {
+                    console.log(err);
+                  });
+                  //
+                } else {
+                  console.log('Email not found. Please try again.');
+                }
+              })
+              .catch( err => {
+                console.log(err);
+              });
+            })
       }   
     })
 }
